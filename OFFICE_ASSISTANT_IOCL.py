@@ -9,7 +9,6 @@ import datetime
 
 
 
-
 FotaGui = Tk()
 
 LogGui=Tk()
@@ -19,53 +18,6 @@ FotaGui.title('Office Assistant for IOCL  ')
 
 LogGui.geometry('800x400')
 LogGui.title('Log of all activities:')
-
-# FotaGui.resizable(False,False)
-#
-# wrapper2=Listbox(FotaGui)
-# wrapper2.pack(side=LEFT,fill=BOTH)
-#
-# # wrapper3=LabelFrame(FotaGui)
-#
-# my_scrollbar1=Scrollbar(wrapper2,orient=VERTICAL)
-# my_scrollbar1.pack(side=RIGHT,fill=Y)
-#
-# my_scrollbar2=Scrollbar(wrapper2,orient=HORIZONTAL)
-# my_scrollbar2.pack(side=BOTTOM,fill=Y)
-#
-# wrapper1=LabelFrame(FotaGui)
-#
-# wrapper2.config(yscrollcommand=my_scrollbar1.set)
-#
-# wrapper2.config(xscrollcommand=my_scrollbar2.set)
-#
-# my_scrollbar1.config(command=wrapper2.yview)
-#
-#
-# my_scrollbar1.config(command=wrapper2.xview)
-#
-#
-# my_canvas=Canvas(wrapper2, yscrollcommand=my_scrollbar.set)
-# my_canvas.pack(side=LEFT,fill=BOTH)
-#
-# my_scrollbar.config(command=my_canvas.yview)
-#
-#
-#
-#
-# # my_canvas.configure(yscrollcommand=my_scrollbar.set)
-# # my_canvas.bind('<Configure>',lambda e:my_canvas.configure(scrollregion=my_canvas.bbox('all')))
-#
-# # main_frame=Frame(my_canvas)
-#
-
-# my_canvas.create_window((0,0),window=main_frame , anchor=NW)
-
-# main_frame.pack(fill=BOTH,expand=1)
-# second_frame=Frame(my_canvas)
-
-# wrapper1.pack(fill='both',expand='yes')
-# wrapper2.pack(fill='both',expand='yes')
 
 filepath = ''
 
@@ -280,7 +232,7 @@ def SPLIT_FILE2():
     df = pd.read_excel(filepath)
     cols = e_1.get()
     colslist = list(set(df[cols].values))
-    # decision = e_2.get().lower()
+    
     if response == 0:
         sendtofile(colslist, filepath)
     elif response == 1:
@@ -361,7 +313,7 @@ def Combine_File2():
                             bd=1, relief='solid',
                             font='Times 10', anchor=N)
         label_head7.pack()
-    # print('All excel files in the selected folder have been combined.')
+
 
 def Combine_File3():
     global filepath
@@ -409,7 +361,7 @@ def Combine_File3():
                             bd=1, relief='solid',
                             font='Times 10', anchor=N)
         label_head7.pack()
-    # print('All excel files in the selected folder have been combined.')
+
 
 
 
@@ -423,7 +375,7 @@ def Combine_PDF():
 
     from PyPDF2 import PdfFileMerger
 
-    # path = r'C:\\Users\\Dell\\Desktop\\Udemy-Python Course\\MY EXERCISE\\GST\\Checking'
+
 
     pth = os.path.dirname(filepath)
 
@@ -492,11 +444,11 @@ def Combine_GSTR2A_File():
 
     pth = os.path.dirname(filepath)
 
-    # path = r'C:\\Users\\Dell\\Desktop\\Udemy-Python Course\\MY EXERCISE\\GST\\Checking'
+
 
     filenames = glob.glob(pth + "/*.xlsx")
 
-    # Check the number of files. Should be at least 2 and maximum 50
+
 
     i = 0
     for file in filenames:
@@ -504,12 +456,11 @@ def Combine_GSTR2A_File():
 
     if i < 1:
         print("Upload at least 2 files")
-    elif i > 50:
-        print("Maximum capacity is 50 files at a time")
+    elif i >60:
+        print("Maximum capacity is 60 files at a time")
     else:
         pass
 
-    # Check the size of the file. Each file Should not be more than 3 Mb.
 
     cum_size = 0
 
@@ -518,11 +469,11 @@ def Combine_GSTR2A_File():
 
         cum_size = cum_size + size
 
-        if size > 3145728:
-            print("Please upload a smaller file size. Maximum limit is 3 mb.")
+        if size > 31457280:
+            print("Please upload a smaller file size. Maximum limit is 30 mb.")
 
-        elif cum_size > 31457280:
-            print("Combined File size for all the file is more than 30 mb. Please use smaller files")
+        elif cum_size > 314572800:
+            print("Combined File size for all the file is more than 300 mb. Please use smaller files")
             break
         else:
             pass

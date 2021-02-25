@@ -34,6 +34,17 @@ label_head0.pack()
 
 
 
+
+my_scrollbar1=Scrollbar(LogGui,orient=VERTICAL)
+my_scrollbar1.pack(side=RIGHT,fill=Y)
+
+my_scrollbar2=Scrollbar(LogGui,orient=HORIZONTAL)
+my_scrollbar2.pack(side=BOTTOM,fill=Y)
+
+
+
+
+
 def HELP_INFO():
     root=Tk()
 

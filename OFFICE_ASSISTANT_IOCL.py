@@ -41,6 +41,8 @@ my_scrollbar1.pack(side=RIGHT,fill=Y)
 my_scrollbar2=Scrollbar(LogGui,orient=HORIZONTAL)
 my_scrollbar2.pack(side=BOTTOM,fill=Y)
 
+LogGui.config(yscollbar=my_scrollbar1.set)
+
 
 
 

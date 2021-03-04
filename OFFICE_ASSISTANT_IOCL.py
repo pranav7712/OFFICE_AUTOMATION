@@ -2,10 +2,19 @@ from tkinter import *
 from tkinter import filedialog, messagebox , ttk
 import pandas as pd
 import os
+import io
 import glob
 from openpyxl import load_workbook
 from shutil import copyfile
+from PyPDF2 import PdfFileMerger
+from PyPDF2 import PdfFileReader
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from pdfminer.pdfpage import PDFPage
+import sys, getopt
 import datetime
+
 
 
 
@@ -33,15 +42,15 @@ label_head0 = Label(FotaGui, text="\n "
 label_head0.pack()
 
 
-
-
-my_scrollbar1=Scrollbar(LogGui,orient=VERTICAL)
-my_scrollbar1.pack(side=RIGHT,fill=Y)
-
-my_scrollbar2=Scrollbar(LogGui,orient=HORIZONTAL)
-my_scrollbar2.pack(side=BOTTOM,fill=Y)
-
-LogGui.config(yscollbar=my_scrollbar1.set)
+#
+#
+# my_scrollbar1=Scrollbar(LogGui,orient=VERTICAL)
+# my_scrollbar1.pack(side=RIGHT,fill=Y)
+#
+# my_scrollbar2=Scrollbar(LogGui,orient=HORIZONTAL)
+# my_scrollbar2.pack(side=BOTTOM,fill=Y)
+#
+# LogGui.config(yscollbar=my_scrollbar1.set)
 
 
 
@@ -384,11 +393,6 @@ def Combine_PDF():
     global filepath
     global label_head7
     global now
-
-
-    from PyPDF2 import PdfFileMerger
-
-
 
     pth = os.path.dirname(filepath)
 
@@ -933,15 +937,70 @@ Browsebutton.pack()
 
 print(filepath)
 
-# label_1 = Label(FotaGui, text='Enter the Column name whose value u want to Split')
-# label_1.pack()
-# e_1 = Entry(FotaGui, width=50, bg='blue', fg='white', borderwidth=4)
-# e_1.pack()
+def convert(fname, pages=None):
 
-# label_2 = Label(FotaGui, text='Whether you want to split in Sheets(S)/ Files(F) ?')
-# label_2.pack()
-# e_2 = Entry(FotaGui, width=50, bg='blue', fg='white', borderwidth=4)
-# e_2.pack()
+    if not pages:
+        pagenums = set()
+    else:
+        pagenums = set(pages)
+
+    output = io.StringIO()
+    manager = PDFResourceManager()
+    converter = TextConverter(manager, output, laparams=LAParams())
+    interpreter = PDFPageInterpreter(manager, converter)
+
+    infile = open(fname, 'rb')
+    for page in PDFPage.get_pages(infile, pagenums):
+        interpreter.process_page(page)
+    infile.close()
+    converter.close()
+    text = output.getvalue()
+    output.close
+    print (text)
+    return text
+
+def Extract_Text():
+    global filepath
+    global label_head7
+    global now
+
+    pdfDir=os.path.dirname(filepath)
+    txtDir=os.path.dirname(filepath)
+
+    if pdfDir == "": pdfDir = os.getcwd() + "\\"  # if no pdfDir passed in
+    for pdf in os.listdir(pdfDir):  # iterate through pdfs in pdf directory
+        fileExtension = pdf.split(".")[-1]
+        if fileExtension == "pdf":
+            pdfFilename = pdfDir +"\\"+ pdf
+            text = convert(pdfFilename)  # get string of text content of pdf
+            textFilename = txtDir + "\\"+ pdf + ".txt"
+            textFile = open(textFilename, "w")  # make text file
+            textFile.write(text)  # write text to text file
+        textFile.close
+
+
+    # for files in filenames:
+    #     merged.append(files)
+    #
+    # extension = os.path.splitext(filepath)[1]
+    # filename = os.path.splitext(filepath)[0]
+    # pth = os.path.dirname(filepath)
+    # newfile = os.path.join(pth, 'Combined_Pdf_File_Auto' + extension)
+    #
+    # merged.write(newfile)
+    # merged.close()
+
+
+
+
+    messagebox.showinfo('Output', 'All pdf files have been converted to text file.\n Click on OK')
+    label_head7 = Label(LogGui,
+                        text='{n}The PDF Files have been converted to text.'.format(
+                            n=now.strftime('%y-%m-%d %H:%M:%S')),
+                        bd=1, relief='solid',
+                        font='Times 10', anchor=N)
+    label_head7.pack()
+
 
 def Clear_Memory():
     messagebox.showinfo('Memory Clear','The file selected have been cleared from memory')
@@ -978,6 +1037,8 @@ Browsebutton = Button(FotaGui, width=20, text="Combine GSTR2A Files", command=Co
 Browsebutton.pack()
 
 
+Browsebutton = Button(FotaGui, width=20, text="Convert Pdf to Word", command=Extract_Text)
+Browsebutton.pack()
 
 label_head11=Label(LogGui, text='Log of all Activities:',anchor=W)
 label_head11.pack()

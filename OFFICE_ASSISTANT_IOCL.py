@@ -14,6 +14,11 @@ from pdfminer.layout import LAParams
 from pdfminer.pdfpage import PDFPage
 import sys, getopt
 import datetime
+import tabula as tb
+import tabulate
+
+
+
 
 
 
@@ -956,7 +961,7 @@ def convert(fname, pages=None):
     converter.close()
     text = output.getvalue()
     output.close
-    print (text)
+    # print (text)
     return text
 
 def Extract_Text():
@@ -978,21 +983,6 @@ def Extract_Text():
             textFile.write(text)  # write text to text file
         textFile.close
 
-
-    # for files in filenames:
-    #     merged.append(files)
-    #
-    # extension = os.path.splitext(filepath)[1]
-    # filename = os.path.splitext(filepath)[0]
-    # pth = os.path.dirname(filepath)
-    # newfile = os.path.join(pth, 'Combined_Pdf_File_Auto' + extension)
-    #
-    # merged.write(newfile)
-    # merged.close()
-
-
-
-
     messagebox.showinfo('Output', 'All pdf files have been converted to text file.\n Click on OK')
     label_head7 = Label(LogGui,
                         text='{n}The PDF Files have been converted to text.'.format(
@@ -1000,6 +990,64 @@ def Extract_Text():
                         bd=1, relief='solid',
                         font='Times 10', anchor=N)
     label_head7.pack()
+
+
+def Extract_Table():
+    global filepath
+    global label_head7
+    global now
+
+    pth = os.path.dirname(filepath)
+
+
+    df =pd.DataFrame()
+
+    tables=tb.read_pdf(filepath,pages="all",multiple_tables=True)
+    for table in tables:
+        i=0
+        # df = pd.concat(table)
+        excel_file = table.to_excel('pdf+convert.xlsx',sheet_name="Table_"+i)
+        i+=1
+    # print(tables[2])
+
+    # csv_table=tb.convert_into(filepath,pth,'Tables_convert.csv')
+    # # df=pd.concat(tables)
+    # df=tb.convert_into(filepath)
+    # excel_file=df.to_excel('pdf+convert.xlsx')
+    #
+    # print(df)
+    # print(tables)
+    #
+    # tabula.io.convert_into(filepath,pth,'csv',lattice=True)
+    # df_tables=read(filepath,pages='all')
+    # print(tabulate(df_tables))
+    #
+    # writer = pd.ExcelWriter("Table_Extracted.xlsx", engine='openpyxl')
+    #
+    # df_tables.to_excel(writer, sheet_name="Tables")
+    #
+
+    # if pdfDir == "": pdfDir = os.getcwd() + "\\"  # if no pdfDir passed in
+    # for pdf in os.listdir(pdfDir):  # iterate through pdfs in pdf directory
+    #     fileExtension = pdf.split(".")[-1]
+    #     if fileExtension == "pdf":
+    #         pdfFilename = pdfDir +"\\"+ pdf
+    #         text = convert(pdfFilename)  # get string of text content of pdf
+    #         textFilename = txtDir + "\\"+ pdf + ".txt"
+    #         textFile = open(textFilename, "w")  # make text file
+    #         textFile.write(text)  # write text to text file
+    #     textFile.close
+    #
+    # messagebox.showinfo('Output', 'All pdf files have been converted to text file.\n Click on OK')
+    # label_head7 = Label(LogGui,
+    #                     text='{n}The PDF Files have been converted to text.'.format(
+    #                         n=now.strftime('%y-%m-%d %H:%M:%S')),
+    #                     bd=1, relief='solid',
+    #                     font='Times 10', anchor=N)
+    # label_head7.pack()
+
+    # writer.save()
+
 
 
 def Clear_Memory():
@@ -1037,8 +1085,13 @@ Browsebutton = Button(FotaGui, width=20, text="Combine GSTR2A Files", command=Co
 Browsebutton.pack()
 
 
-Browsebutton = Button(FotaGui, width=20, text="Convert Pdf to Word", command=Extract_Text)
+Browsebutton = Button(FotaGui, width=20, text="Convert Pdf to Text", command=Extract_Text)
 Browsebutton.pack()
+
+Browsebutton = Button(FotaGui, width=20, text="Extract table to Excel", command=Extract_Table)
+Browsebutton.pack()
+
+
 
 label_head11=Label(LogGui, text='Log of all Activities:',anchor=W)
 label_head11.pack()

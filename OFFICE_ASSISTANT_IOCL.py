@@ -17,25 +17,18 @@ import datetime
 import tabula as tb
 import tabulate
 
-
-
-
-
-
-
 FotaGui = Tk()
-
 LogGui=Tk()
 
 FotaGui.geometry('500x600')
-FotaGui.title('Office Assistant for IOCL  ')
+FotaGui.title('Office Assistant for Corporates  ')
 
 LogGui.geometry('800x400')
 LogGui.title('Log of all activities:')
 
 filepath = ''
 
-label_head0 = Label(FotaGui, text="   Office Assistant for IOCL Users:"
+label_head0 = Label(FotaGui, text="   Office Assistant for Corporate Users:"
                                    "\n Program for automating various office functions"
                                    "\n" , font="Times 10 ")
 
@@ -43,22 +36,7 @@ label_head0.pack()
 
 label_head0 = Label(FotaGui, text="\n "
                                    "\n Click on HELP_INFO for more Information", font="Times 10 ",anchor=W)
-
 label_head0.pack()
-
-
-#
-#
-# my_scrollbar1=Scrollbar(LogGui,orient=VERTICAL)
-# my_scrollbar1.pack(side=RIGHT,fill=Y)
-#
-# my_scrollbar2=Scrollbar(LogGui,orient=HORIZONTAL)
-# my_scrollbar2.pack(side=BOTTOM,fill=Y)
-#
-# LogGui.config(yscollbar=my_scrollbar1.set)
-
-
-
 
 
 def HELP_INFO():
@@ -97,7 +75,7 @@ def HELP_INFO():
                                       '\n So, only one file in that folder to be selected.'
                                       '\n The program will automatically read all other pdf files/ excel/ text files and merge them'
                                    '\n "COMBINE NORMAL EXCEL FILES":In case of Combining Excel, there are two options '
-                                   '\n 1. Combine Files : In this The first sheet of all the Excel files will be merged.'
+                                   '\n 1. Combine Files : In this the FIRST sheet of all the Excel files will be merged.'
                                    '\n 2. Combine Sheets: In case , User has to select 1 excel file and then all the sheets of this excel file will be combined '
                                    '\n'
                                    '\n "Combine GSTR2A file": It is to be used specificaly for the GSTR 2A downloaded from GST Site (For Tax People Specifically)'
@@ -113,8 +91,8 @@ def HELP_INFO():
 
     label_head6 = Label(root, text='For Any Other Queries/ Issues/ Feedback: Please Contact'
                                    '\n Pranav P Tulshyan'
-                                   '\n Email= pratiktp@indianoil.in'
-                                   '\n Mob: 9205526726'
+                                   '\n Email= pranav.tulshyan@gmail.com'
+                                   '\n Mob: 920*******'
                                    '\n'
                                    '\n We want feedbak on this program so that it can be further improved and enhabced to meet needs of more users', bd=1, relief='solid',
                         font='Times 11', anchor=N)
@@ -123,10 +101,6 @@ def HELP_INFO():
     root.title('Help/ Info About the Program')
 
     root.mainloop()
-
-label_head7=Label(LogGui)
-
-labels=[]
 
 def file_path():
     global filepath
@@ -159,7 +133,6 @@ def file_path():
                         font='Times 10', anchor=N)
         label_head7.pack()
 
-
 def sendtofile(colslist, filepath):
     df = pd.read_excel(filepath)
     cols = e_1.get()
@@ -184,7 +157,6 @@ def sendtofile(colslist, filepath):
     print('\nCompleted')
     print('Thanks for using this program.')
     return
-
 
 def sendtosheet(colslist):
     cols = e_1.get()
@@ -219,7 +191,6 @@ def sendtosheet(colslist):
     print('\nCompleted')
     print('Thanks for using this program.')
     return
-
 
 def SPLIT_FILE():
     global filepath
@@ -267,7 +238,6 @@ def SPLIT_FILE2():
     else:
         messagebox.showerror('Output',"Something went wrong")
 
-
 def Combine_File():
     global filepath
     global sheet_pos
@@ -299,7 +269,6 @@ def Combine_File():
     label_1.pack()
 
     combwin.mainloop()
-
 
 def Combine_File2():
     global filepath
@@ -340,7 +309,6 @@ def Combine_File2():
                             bd=1, relief='solid',
                             font='Times 10', anchor=N)
         label_head7.pack()
-
 
 def Combine_File3():
     global filepath
@@ -389,9 +357,6 @@ def Combine_File3():
                             font='Times 10', anchor=N)
         label_head7.pack()
 
-
-
-
 def Combine_PDF():
     import glob
     import os
@@ -424,7 +389,6 @@ def Combine_PDF():
                         font='Times 10', anchor=N)
     label_head7.pack()
 
-
 def Combine_SAP_Txt_files():
     import pandas as pd
     import glob
@@ -456,7 +420,6 @@ def Combine_SAP_Txt_files():
     label_head7.pack()
 
     print('All SAP text files in the selected folder have been merged')
-
 
 def Combine_GSTR2A_File():
     import pandas as pd
@@ -928,20 +891,6 @@ def Combine_GSTR2A_File():
                         font='Times 10', anchor=N)
     label_head7.pack()
 
-
-Browsebutton = Button(FotaGui, width=15, text="HELP_INFO", command=HELP_INFO)
-Browsebutton.pack()
-
-
-label_0 = Label(FotaGui, text='\n'
-                               '\n Step: 1 Select the File by clicking Browse Button !!!' ,font='Times 11', anchor=N)
-label_0.pack()
-Browsebutton = Button(FotaGui, width=15, text="BROWSE", command=file_path)
-Browsebutton.pack()
-
-
-print(filepath)
-
 def convert(fname, pages=None):
 
     if not pages:
@@ -990,7 +939,6 @@ def Extract_Text():
                         bd=1, relief='solid',
                         font='Times 10', anchor=N)
     label_head7.pack()
-
 
 def Extract_Table():
     global filepath
@@ -1048,19 +996,26 @@ def Extract_Table():
 
     # writer.save()
 
-
-
 def Clear_Memory():
     messagebox.showinfo('Memory Clear','The file selected have been cleared from memory')
     now=datetime.datetime.now()
     label_head12=Label(LogGui,text='{n}:The file selected have been cleared from memory. You may browse file again '.format(n=now.strftime("%y-%m-%d %H:%M:%S")))
     label_head12.pack()
 
-Browsebutton = Button(FotaGui, width=20, text="Clear Memory", command=Clear_Memory)
+
+Browsebutton = Button(FotaGui, width=15, text="HELP_INFO", command=HELP_INFO)
 Browsebutton.pack()
 
 
+label_0 = Label(FotaGui, text='\n'
+                               '\n Step: 1 Select the File by clicking Browse Button !!!' ,font='Times 11', anchor=N)
+label_0.pack()
 
+Browsebutton = Button(FotaGui, width=15, text="BROWSE", command=file_path)
+Browsebutton.pack()
+
+Browsebutton = Button(FotaGui, width=20, text="Clear Memory", command=Clear_Memory)
+Browsebutton.pack()
 
 label_20 = Label(FotaGui, text='\n'
                                '\n Step: 2 Click on the Action which you want to Perform !!!'
@@ -1080,10 +1035,8 @@ Browsebutton.pack()
 Browsebutton = Button(FotaGui, width=20, text="Combine Txt Files", command=Combine_SAP_Txt_files)
 Browsebutton.pack()
 
-
 Browsebutton = Button(FotaGui, width=20, text="Combine GSTR2A Files", command=Combine_GSTR2A_File)
 Browsebutton.pack()
-
 
 Browsebutton = Button(FotaGui, width=20, text="Convert Pdf to Text", command=Extract_Text)
 Browsebutton.pack()
@@ -1091,11 +1044,8 @@ Browsebutton.pack()
 Browsebutton = Button(FotaGui, width=20, text="Extract table to Excel", command=Extract_Table)
 Browsebutton.pack()
 
-
-
 label_head11=Label(LogGui, text='Log of all Activities:',anchor=W)
 label_head11.pack()
-
 
 label_head12 = Label(FotaGui, text="   \n"
                                     "\n"

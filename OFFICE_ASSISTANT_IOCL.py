@@ -202,6 +202,8 @@ def SPLIT_FILE():
 
     splitwin=Tk()
 
+    
+
     label_1 = Label(splitwin, text='Enter the Exact Column name whose value u want to Split')
     label_1.pack()
     e_1 = Entry(splitwin, width=50, bg='blue', fg='white', borderwidth=4)
@@ -891,28 +893,6 @@ def Combine_GSTR2A_File():
                         font='Times 10', anchor=N)
     label_head7.pack()
 
-def convert(fname, pages=None):
-
-    if not pages:
-        pagenums = set()
-    else:
-        pagenums = set(pages)
-
-    output = io.StringIO()
-    manager = PDFResourceManager()
-    converter = TextConverter(manager, output, laparams=LAParams())
-    interpreter = PDFPageInterpreter(manager, converter)
-
-    infile = open(fname, 'rb')
-    for page in PDFPage.get_pages(infile, pagenums):
-        interpreter.process_page(page)
-    infile.close()
-    converter.close()
-    text = output.getvalue()
-    output.close
-    # print (text)
-    return text
-
 def Extract_Text():
     global filepath
     global label_head7
@@ -939,6 +919,28 @@ def Extract_Text():
                         bd=1, relief='solid',
                         font='Times 10', anchor=N)
     label_head7.pack()
+
+def convert(fname, pages=None):
+
+    if not pages:
+        pagenums = set()
+    else:
+        pagenums = set(pages)
+
+    output = io.StringIO()
+    manager = PDFResourceManager()
+    converter = TextConverter(manager, output, laparams=LAParams())
+    interpreter = PDFPageInterpreter(manager, converter)
+
+    infile = open(fname, 'rb')
+    for page in PDFPage.get_pages(infile, pagenums):
+        interpreter.process_page(page)
+    infile.close()
+    converter.close()
+    text = output.getvalue()
+    output.close
+    # print (text)
+    return text
 
 def Extract_Table():
     global filepath
@@ -1052,7 +1054,7 @@ label_head12 = Label(FotaGui, text="   \n"
                                     "\n"
                                     "\n Feedback for improving the Program is sought."
                                     "\n Based on Feedback, program can be improved to Cater needs of Specific Users"
-                                    "\n Send your feedback at pratiktp@indianoil.in ", font="Times 10 ")
+                                    "\n Send your feedback at pranav.tulshyan@gmail.com ", font="Times 10 ")
 
 label_head12.pack()
 

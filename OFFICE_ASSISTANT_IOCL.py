@@ -148,6 +148,7 @@ def sendtofile(colslist, filepath):
     messagebox.showinfo('Output', 'You data has been split into {} and {} files has been created.Click OK. \n All Files stored in same folder'.format(
                             ', '.join(colslist), len(colslist)))
 
+
     label_head7 = Label(LogGui,
                         text='{n}The Files have been Splitted to different Files.'.format(n=now.strftime('%y-%m-%d %H:%M:%S')),
                         bd=1, relief='solid',
@@ -1003,7 +1004,6 @@ def Clear_Memory():
     now=datetime.datetime.now()
     label_head12=Label(LogGui,text='{n}:The file selected have been cleared from memory. You may browse file again '.format(n=now.strftime("%y-%m-%d %H:%M:%S")))
     label_head12.pack()
-
 
 Browsebutton = Button(FotaGui, width=15, text="HELP_INFO", command=HELP_INFO)
 Browsebutton.pack()

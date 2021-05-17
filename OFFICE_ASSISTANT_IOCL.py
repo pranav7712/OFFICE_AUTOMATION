@@ -148,6 +148,7 @@ def sendtofile(colslist, filepath):
     messagebox.showinfo('Output', 'You data has been split into {} and {} files has been created.Click OK. \n All Files stored in same folder'.format(
                             ', '.join(colslist), len(colslist)))
 
+
     label_head7 = Label(LogGui,
                         text='{n}The Files have been Splitted to different Files.'.format(n=now.strftime('%y-%m-%d %H:%M:%S')),
                         bd=1, relief='solid',
@@ -201,6 +202,8 @@ def SPLIT_FILE():
 
 
     splitwin=Tk()
+
+    
 
     label_1 = Label(splitwin, text='Enter the Exact Column name whose value u want to Split')
     label_1.pack()
@@ -891,28 +894,6 @@ def Combine_GSTR2A_File():
                         font='Times 10', anchor=N)
     label_head7.pack()
 
-def convert(fname, pages=None):
-
-    if not pages:
-        pagenums = set()
-    else:
-        pagenums = set(pages)
-
-    output = io.StringIO()
-    manager = PDFResourceManager()
-    converter = TextConverter(manager, output, laparams=LAParams())
-    interpreter = PDFPageInterpreter(manager, converter)
-
-    infile = open(fname, 'rb')
-    for page in PDFPage.get_pages(infile, pagenums):
-        interpreter.process_page(page)
-    infile.close()
-    converter.close()
-    text = output.getvalue()
-    output.close
-    # print (text)
-    return text
-
 def Extract_Text():
     global filepath
     global label_head7
@@ -939,6 +920,28 @@ def Extract_Text():
                         bd=1, relief='solid',
                         font='Times 10', anchor=N)
     label_head7.pack()
+
+def convert(fname, pages=None):
+
+    if not pages:
+        pagenums = set()
+    else:
+        pagenums = set(pages)
+
+    output = io.StringIO()
+    manager = PDFResourceManager()
+    converter = TextConverter(manager, output, laparams=LAParams())
+    interpreter = PDFPageInterpreter(manager, converter)
+
+    infile = open(fname, 'rb')
+    for page in PDFPage.get_pages(infile, pagenums):
+        interpreter.process_page(page)
+    infile.close()
+    converter.close()
+    text = output.getvalue()
+    output.close
+    # print (text)
+    return text
 
 def Extract_Table():
     global filepath
@@ -1002,7 +1005,6 @@ def Clear_Memory():
     label_head12=Label(LogGui,text='{n}:The file selected have been cleared from memory. You may browse file again '.format(n=now.strftime("%y-%m-%d %H:%M:%S")))
     label_head12.pack()
 
-
 Browsebutton = Button(FotaGui, width=15, text="HELP_INFO", command=HELP_INFO)
 Browsebutton.pack()
 
@@ -1052,7 +1054,7 @@ label_head12 = Label(FotaGui, text="   \n"
                                     "\n"
                                     "\n Feedback for improving the Program is sought."
                                     "\n Based on Feedback, program can be improved to Cater needs of Specific Users"
-                                    "\n Send your feedback at pratiktp@indianoil.in ", font="Times 10 ")
+                                    "\n Send your feedback at pranav.tulshyan@gmail.com ", font="Times 10 ")
 
 label_head12.pack()
 

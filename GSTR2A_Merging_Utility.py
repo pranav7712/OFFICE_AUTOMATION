@@ -4,6 +4,8 @@ import os
 import glob
 from tkinter import messagebox,filedialog
 import datetime
+import warnings
+import numpy as np
 
 
 FotaGui=Tk()
@@ -18,6 +20,9 @@ LogGui.title("Log of all activities")
 
 Label_1=Label(FotaGui,text="This is the utility for merging GSTR 2A",font="Times 16")
 Label_1.pack()
+
+warnings.filterwarnings('ignore')
+
 
 def file_path():
     global filepath
@@ -154,6 +159,10 @@ def Combine_GSTR2A_File():
 
     df3['Sheet_Name'] = ("B2B")
 
+    df3['PAN_Number'] = df3["GSTIN_of_Supplier"].apply(lambda x: x[2:12:1])
+
+    df3 = df3.replace(np.nan, "", regex=True)
+
     label_head21=Label(FotaGui,text='The B2B table is being combined... Please wait')
 
     # A.2 : This will iterate through the B2BA file
@@ -212,8 +221,13 @@ def Combine_GSTR2A_File():
     df4['Total_tax'] = df4['IGST_Rs'] + df4['CGST_Rs'] + df4['SGST_Rs']
     df4['Unique_ID'] = df4['GSTIN_of_Supplier'] + "/" + df4['Inv_CN_DN_Number_Original'] + "/" + df4[
         'Inv_CN_DN_Date_Unique']
+    df4["Inv_CN_DN_Date_Revised_Unique"]=df4['Inv_CN_DN_Date_Revised'].str.replace("-", ".")
 
     df4['Sheet_Name'] = ("B2BA")
+
+    df4['PAN_Number'] = df4["GSTIN_of_Supplier"].apply(lambda x: x[2:12:1])
+
+    df4 = df4.replace(np.nan, "", regex=True)
 
 
 
@@ -275,7 +289,13 @@ def Combine_GSTR2A_File():
     df5['Unique_ID'] = df5['GSTIN_of_Supplier'] + "/" + df5['Inv_CN_DN_Number_Original'] + "/" + df5[
         'Inv_CN_DN_Date_Unique']
 
+
+
     df5['Sheet_Name'] = ("CDNR")
+
+    df5['PAN_Number'] = df5["GSTIN_of_Supplier"].apply(lambda x: x[2:12:1])
+
+    df5 = df5.replace(np.nan, "", regex=True)
 
 
 
@@ -336,7 +356,13 @@ def Combine_GSTR2A_File():
     df6['Unique_ID'] = df6['GSTIN_of_Supplier'] + "/" + df6['Inv_CN_DN_Number_Original'] + "/" + df6[
         'Inv_CN_DN_Date_Unique']
 
+    df6["Inv_CN_DN_Date_Revised_Unique"] = df6['Inv_CN_DN_Date_Revised'].str.replace("-", ".")
+
     df6['Sheet_Name'] = ("CDNRA")
+
+    df6['PAN_Number'] = df6["GSTIN_of_Supplier"].apply(lambda x: x[2:12:1])
+
+    df6 = df6.replace(np.nan, "", regex=True)
 
 
 
@@ -348,8 +374,28 @@ def Combine_GSTR2A_File():
 
     df10 = df9.append(df6)
 
-    # df10['Ultimate_Unique']=df10['Sheet_Name']+"_"+str(df10['Supply_Attract_Reverse_Charge'])+str(df10['GSTR_1_5_Filing_Status'])
-    # +"_"+df10['Unique_ID']
+    df10['PAN_Number'] = df10["GSTIN_of_Supplier"].apply(lambda x: x[2:12:1])
+
+    df10 = df10.replace(np.nan, "", regex=True)
+
+    df10["Ultimate_Unique"]=df10["Sheet_Name"]+"/"+df10["Supply_Attract_Reverse_Charge"]+df10["GSTR_1_5_Filing_Status"]+"/"+df10["Unique_ID"]
+
+
+    df10["PAN_3_Way_Key"] = np.where(df10["Sheet_Name"] == "B2BA",
+                                     df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Number_Revised"] + "/"
+                                     + df10["Inv_CN_DN_Date_Revised_Unique"],
+                                     df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Number_Original"]
+                                     + "/" + df10["Inv_CN_DN_Date_Unique"])
+
+    df10["PAN_2_Way_Key_PAN_InvNo"] = np.where(df10["Sheet_Name"] == "B2BA",
+                                               df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Number_Revised"]
+                                               , df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Number_Original"])
+
+    df10["PAN_2_Way_Key_PAN_InvDt"] = np.where(df10["Sheet_Name"] == "B2BA",
+                                               df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Date_Revised_Unique"]
+                                               , df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Date_Unique"])
+
+
 
     # maiking a sheet with person who did not file the GSTR 1
 

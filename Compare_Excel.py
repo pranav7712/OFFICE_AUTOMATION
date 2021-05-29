@@ -1,9 +1,13 @@
 import pandas as pd
 import numpy as np
 from tkinter import *
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import os
 import datetime
+import datacompy
+import ast
+
+
 
 FotaGui = Tk()
 LogGui=Tk()
@@ -11,6 +15,8 @@ LogGui=Tk()
 FotaGui.geometry("500x500")
 LogGui.geometry("400x400")
 
+FotaGui.title("App for comparing two excel files")
+LogGui.title("Log of all activities")
 
 oldfile = StringVar()
 newfile = StringVar()
@@ -32,19 +38,9 @@ def old_file():
         oldfile = filedialog.askopenfilename(initialdir=oldfile,
                                               title="Select a file", filetypes=[("All Files", "*.*"),("Pdf Files","*.pdf"),("Text Files","*.txt"),("Excel FIles","*.xlsx")])
 
-    extension = os.path.splitext(oldfile)[1]
-    filename = os.path.splitext(oldfile)[0]
-    pth = os.path.dirname(oldfile)
-    # files = glob.glob(os.path.join(pth, '*{ext}'.format(ext=extension)))
-
-    #
-    #
-    # for f in files:
-    #
     label_head7 = Label(LogGui, text='{n}The File {fil} have been selected.'.format(fil=oldfile,n=now.strftime('%y-%m-%d %H:%M:%S')),bd=1, relief='solid',
                     font='Times 10', anchor=N)
     label_head7.pack()
-    #
 
 
 def new_file():
@@ -55,8 +51,6 @@ def new_file():
 
     now = datetime.datetime.now()
 
-
-
     # Fetch the file path of the hex file browsed.
     if (newfile == ""):
         newfile = filedialog.askopenfilename(initialdir=os.getcwd(),
@@ -65,107 +59,93 @@ def new_file():
         newfile = filedialog.askopenfilename(initialdir=newfile,
                                               title="Select a file", filetypes=[("All Files", "*.*"),("Pdf Files","*.pdf"),("Text Files","*.txt"),("Excel FIles","*.xlsx")])
 
-    # extension = os.path.splitext(filepath)[1]
-    # filename = os.path.splitext(filepath)[0]
-    # pth = os.path.dirname(filepath)
-    # files = glob.glob(os.path.join(pth, '*{ext}'.format(ext=extension)))
-    #
-    #
-    #
-    # for f in files:
-    #
     label_head7 = Label(LogGui, text='{n}The File {fil} have been selected.'.format(fil=newfile,n=now.strftime('%y-%m-%d %H:%M:%S')),bd=1, relief='solid',
                     font='Times 10', anchor=N)
     label_head7.pack()
 
-    #
+def read_files():
+    global oldfile
+    global newfile
+    global df1
+    global df2
+    global e_1
+    global e_2
+    global e_3
+    global commoncol
+
+    df1 = pd.read_excel(oldfile,sheet_name=0)
+    df2 = pd.read_excel(newfile,sheet_name=0)
+
+
+    commoncol = np.intersect1d(df2.columns, df1.columns)
+
+    messagebox.showinfo("Output","We have read both the files, The common columns are {} .No of Common columns {}".format(",".join(commoncol),len(commoncol)))
+
+
+    label_2=Label(FotaGui,text="Enter name of minimium 1 and maximum three names of common columns")
+    label_2.pack()
+
+    e_1 = Entry(FotaGui, width=50, bg='blue', fg='white', borderwidth=4)
+    e_1.pack()
+    e_2 = Entry(FotaGui, width=50, bg='blue', fg='white', borderwidth=4)
+    e_2.pack()
+    e_3 = Entry(FotaGui, width=50, bg='blue', fg='white', borderwidth=4)
+    e_3.pack()
+
+    Button_1 = Button(FotaGui, text="Compare_Excel", command=compare_files)
+    Button_1.pack()
 
 
 def compare_files():
     global oldfile
     global newfile
+    global df1
+    global df2
+    global commoncol
+    global e_1
+    global e_2
+    global e_3
 
-    df1=pd.read_excel(oldfile)
-    df2=pd.read_excel(newfile)
-
-
-    print(df1)
-    print(df2)
-
-    print(df1.equals(df2))
-
-    comparevalues=df1.values==df2.values
-
-    print(comparevalues)
+    str1=e_1.get()
+    str2=e_2.get()
+    str3=e_3.get()
 
 
-    (a,b)=np.where(comparevalues==False)
-    print(a,b)
+    listcomcol=[]
 
-    zipped=list(zip(a,b))
+    listcomcol.append(str3)
+    listcomcol.append(str2)
+    listcomcol.append(str1)
 
-    for (i,j) in zipped:
-        df1.iloc[i,j]="{} is now {}".format(df1.iloc[i,j],df2.iloc[i,j])
+    a_set=set(commoncol)
+    b_set=set(listcomcol)
 
-    dir=os.path.dirname(oldfile)
-    newfile=os.path.join(dir,"Compared.xlsx")
-    df1.to_excel(newfile, index=False)
+    common=list(set(a_set.intersection(b_set)))
 
+    comparevalues=datacompy.Compare(df1,df2,join_columns=common)
 
-def compare_files():
-    global oldfile
-    global newfile
+    print(comparevalues.report())
 
-    df1=pd.read_excel(oldfile)
-    df2=pd.read_excel(newfile)
+    df=pd.DataFrame()  ##this is for creating a csv file for the report
 
+    df.to_csv(os.path.join(os.path.dirname(newfile),"Comparison_File.csv"))
 
-    print(df1)
-    print(df2)
+    outputfile=os.path.join(os.path.dirname(newfile),"Comparison_File.csv")
 
-    print(df1.equals(df2))
+    with open(outputfile, mode="r+",encoding='utf-8') as report_file:
+        report_file.write(comparevalues.report())
 
-    comparevalues=df1.values==df2.values
+    messagebox.showinfo("Output","The Comparison report has been exported to csv file at {}".format(outputfile))
 
-    print(comparevalues)
+    label_head12 = Label(FotaGui, text="   \n"
+                                       "\n"
+                                       "\n"
+                                       "\n Feedback for improving the Program is sought."
+                                       "\n Based on Feedback, program can be improved to Cater needs of Specific Users"
+                                       "\n Send your feedback at pranav.tulshyan@gmail.com ", font="Times 10 ")
 
+    label_head12.pack()
 
-    (a,b)=np.where(comparevalues==False)
-    print(a,b)
-
-    zipped=list(zip(a,b))
-
-    for (i,j) in zipped:
-        df1.iloc[i,j]="{} is now {}".format(df1.iloc[i,j],df2.iloc[i,j])
-
-
-    dir=os.path.dirname(oldfile)
-    comfile=os.path.join(dir,"Compared.xlsx")
-    df1.to_excel(comfile, index=False)
-
-
-def highlight_changes():
-    global oldfile
-    global newfile
-
-    df1 = pd.read_excel(oldfile)
-    df2 = pd.read_excel(newfile)
-
-    comparevalues = df1.values == df2.values
-
-
-    (a, b) = np.where(comparevalues == False)
-    print(a, b)
-
-    zipped = list(zip(a, b))
-
-    for (i, j) in zipped:
-        df1.iloc[i, j] = df2.iloc[i, j]
-        df1.iloc[i, j] = df1.style.apply(lambda x: "background:red",axis=0)
-
-    dir = os.path.dirname(oldfile)
-    newfile = os.path.join(dir, "Highlighted.xlsx")
-    df1.to_excel(newfile, index=False)
 
 
 label_0 = Label(FotaGui, text='\n')
@@ -174,11 +154,11 @@ label_0.pack()
 label_0 = Label(FotaGui, text='Step: 1 Select the File by clicking Browse Button !!!' ,font='Times 11', anchor=N,bd=1, relief='solid')
 label_0.pack()
 
-Browsebutton = Button(FotaGui, width=15, text="BROWSE_old_File", command=old_file)
+Browsebutton = Button(FotaGui, width=15, text="BROWSE_Old_File-df1", command=old_file)
 Browsebutton.pack()
 
 
-Browsebutton = Button(FotaGui, width=15, text="BROWSE_new_file", command=new_file)
+Browsebutton = Button(FotaGui, width=15, text="BROWSE_New_file-df2", command=new_file)
 Browsebutton.pack()
 
 
@@ -192,21 +172,9 @@ label_head4 = Label(FotaGui, text='Step 2: Click on the action button at the bel
 
 label_head4.pack()
 
-Button_1=Button(FotaGui,text="Compare_Excel",command=compare_files)
+
+Button_1=Button(FotaGui,text="Read_Excel",command=read_files)
 Button_1.pack()
-
-
-label_head12 = Label(FotaGui, text="   \n"
-                                    "\n"
-                                    "\n"
-                                    "\n Feedback for improving the Program is sought."
-                                    "\n Based on Feedback, program can be improved to Cater needs of Specific Users"
-                                    "\n Send your feedback at pranav.tulshyan@gmail.com ", font="Times 10 ")
-
-label_head12.pack()
-
-
-
 
 LogGui.mainloop()
 FotaGui.mainloop()

@@ -1,106 +1,28 @@
-from tkinter import *
-from tkinter import filedialog, messagebox , ttk
 import pandas as pd
+from tkinter import *
 import os
-import io
 import glob
-from openpyxl import load_workbook
-from shutil import copyfile
-from PyPDF2 import PdfFileMerger
-from PyPDF2 import PdfFileReader
-from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-from pdfminer.converter import TextConverter
-from pdfminer.layout import LAParams
-from pdfminer.pdfpage import PDFPage
-import sys, getopt
+from tkinter import messagebox,filedialog
 import datetime
-import tabula as tb
-import tabulate
+import warnings
+import numpy as np
 
-FotaGui = Tk()
+
+FotaGui=Tk()
+
 LogGui=Tk()
 
-FotaGui.geometry('500x600')
-FotaGui.title('Office Assistant for Corporates  ')
+FotaGui.geometry("500x500")
+LogGui.geometry("250x250")
 
-LogGui.geometry('800x400')
-LogGui.title('Log of all activities:')
+FotaGui.title("Utility for Merging GSTR2A")
+LogGui.title("Log of all activities")
 
-filepath = ''
+Label_1=Label(FotaGui,text="This is the utility for merging GSTR 2A",font="Times 16")
+Label_1.pack()
 
-label_head0 = Label(FotaGui, text="   Office Assistant for Corporate Users:"
-                                   "\n Program for automating various office functions"
-                                   "\n" , font="Times 10 ")
+warnings.filterwarnings('ignore')
 
-label_head0.pack()
-
-label_head0 = Label(FotaGui, text="\n "
-                                   "\n Click on HELP_INFO for more Information", font="Times 10 ",anchor=W)
-label_head0.pack()
-
-
-def HELP_INFO():
-    root=Tk()
-
-    label_head0 = Label(root, text="   Program for office functions", font="Times 10 ")
-
-    label_head0.pack()
-
-    label_head1 = Label(root, text='This is the program to perform various tasks in Pdf or Text or  Excel Files in 2 steps .'
-                                      ' \n   .', bd=1, relief='solid', font='Times 12', anchor=N)
-    label_head1.pack()
-
-    label_head2 = Label(root, text='Step 1: Click "Browse" button to select the file which you want to perform action .'
-                                   '\n The "Clear Memory" button can be used to clear the files selected and reselect the file',
-                        bd=1, relief='solid', font='Times 12', anchor=N)
-    label_head2.pack()
-
-    label_head3 = Label(root, text='Step 2: Click on the action button at the below:', bd=1, relief='solid',
-                        font='Times 12', anchor=N)
-    label_head3.pack()
-
-    label_head4 = Label(root,
-                        text='\n "SPLIT FILES" In case you want to split files, you need to specify:'
-                             '\n The exact name of the column based on which you want to split the file.'
-                             '\n The Files can either be splitted into various sheets in same file or in different files'
-                             ,
-                        bd=1, relief='solid', font='Times 12', anchor=N
-                        )
-
-    label_head4.pack()
-
-    label_head5 = Label(root, text='NOTE 2: For Combining Excel/pdf/Text files, please note below:'
-                                      '\n All Excel or pdf or text files to be combined should be kept in a single folder'
-                                      '\n On clicking browse, multiple files cannot be selected.'
-                                      '\n So, only one file in that folder to be selected.'
-                                      '\n The program will automatically read all other pdf files/ excel/ text files and merge them'
-                                   '\n "COMBINE NORMAL EXCEL FILES":In case of Combining Excel, there are two options '
-                                   '\n 1. Combine Files : In this the FIRST sheet of all the Excel files will be merged.'
-                                   '\n 2. Combine Sheets: In case , User has to select 1 excel file and then all the sheets of this excel file will be combined '
-                                   '\n'
-                                   '\n "Combine GSTR2A file": It is to be used specificaly for the GSTR 2A downloaded from GST Site (For Tax People Specifically)'
-                                   '\n'
-                                   '\n "Combine PDF Files": This will merge the PDF files in the sequence they are stored in the folder'
-                                   '\n'
-                                   '\n "Combine SAP TXT Files": This will Combine the various Text Files. Please ensure that rows heading are same for all text files    '
-                        , bd=1, relief='solid', font='Times 12', anchor=N
-
-                        )
-
-    label_head5.pack()
-
-    label_head6 = Label(root, text='For Any Other Queries/ Issues/ Feedback: Please Contact'
-                                   '\n Pranav P Tulshyan'
-                                   '\n Email= pranav.tulshyan@gmail.com'
-                                   '\n Mob: 920*******'
-                                   '\n'
-                                   '\n We want feedbak on this program so that it can be further improved and enhabced to meet needs of more users', bd=1, relief='solid',
-                        font='Times 11', anchor=N)
-    label_head6.pack()
-
-    root.title('Help/ Info About the Program')
-
-    root.mainloop()
 
 def file_path():
     global filepath
@@ -133,296 +55,8 @@ def file_path():
                         font='Times 10', anchor=N)
         label_head7.pack()
 
-def sendtofile(colslist, filepath):
-    df = pd.read_excel(filepath)
-    cols = e_1.get()
-    pth = os.path.dirname(filepath)
-    colslist = list(set(df[cols].values))
-    global now
 
 
-
-    for i in colslist:
-        df[df[cols] == i].to_excel("{}/{}.xlsx".format(pth, i), sheet_name=i, index=False)
-
-    messagebox.showinfo('Output', 'You data has been split into {} and {} files has been created.Click OK. \n All Files stored in same folder'.format(
-                            ', '.join(colslist), len(colslist)))
-
-
-    label_head7 = Label(LogGui,
-                        text='{n}The Files have been Splitted to different Files.'.format(n=now.strftime('%y-%m-%d %H:%M:%S')),
-                        bd=1, relief='solid',
-                        font='Times 10', anchor=N)
-    label_head7.pack()
-
-    print('\nCompleted')
-    print('Thanks for using this program.')
-    return
-
-def sendtosheet(colslist):
-    cols = e_1.get()
-    extension = os.path.splitext(filepath)[1]
-    filename = os.path.splitext(filepath)[0]
-    pth = os.path.dirname(filepath)
-    newfile = os.path.join(pth, filename + '_Sheet_Split_Auto' + extension)
-    df = pd.read_excel(filepath)
-    colslist = list(set(df[cols].values))
-
-
-
-    copyfile(filepath, newfile)
-    for j in colslist:
-        writer = pd.ExcelWriter(newfile, engine='openpyxl')
-        for myname in colslist:
-            mydf = df.loc[df[cols] == myname]
-            mydf.to_excel(writer, sheet_name=myname, index=False)
-        writer.save()
-
-    messagebox.showinfo('Output',
-                        'You data has been split into {} and {} sheets has been created under single file named {new}.\n Click on OK .'.format(
-                            ', '.join(colslist), len(colslist),new=newfile))
-
-    label_head7 = Label(LogGui,
-                        text='{n}The Files have been Splitted to different sheets.'.format(
-                            n=now.strftime('%y-%m-%d %H:%M:%S')),
-                        bd=1, relief='solid',
-                        font='Times 10', anchor=N)
-    label_head7.pack()
-
-    print('\nCompleted')
-    print('Thanks for using this program.')
-    return
-
-def SPLIT_FILE():
-    global filepath
-    global e_1
-    global e_2
-
-
-
-
-    splitwin=Tk()
-
-    
-
-    label_1 = Label(splitwin, text='Enter the Exact Column name whose value u want to Split')
-    label_1.pack()
-    e_1 = Entry(splitwin, width=50, bg='blue', fg='white', borderwidth=4)
-    e_1.pack()
-
-
-
-    Browsebutton = Button(splitwin, width=20, text="Split Files", command=SPLIT_FILE2)
-    Browsebutton.pack()
-
-    splitwin.mainloop()
-
-def SPLIT_FILE2():
-
-    df = pd.read_excel(filepath)
-    cols = e_1.get()
-    colslist = list(set(df[cols].values))
-
-    messagebox.showinfo('Check the output',
-                        'You data will split based on these values {} and create {} files or sheets based on next selection. If you are ready to proceed Click OK or close the dialog box to re-start.'.format(
-                            ', '.join(colslist), len(colslist)))
-
-    response=messagebox.askyesno('Split Files','Do you want to split in Various Sheets in Same file  OR Different Files? '
-                                               '\nClick Yes for Various Sheets in Same File.!'
-                                               '\n CLick No For Different Files')
-    df = pd.read_excel(filepath)
-    cols = e_1.get()
-    colslist = list(set(df[cols].values))
-    
-    if response == 0:
-        sendtofile(colslist, filepath)
-    elif response == 1:
-        sendtosheet(colslist)
-    else:
-        messagebox.showerror('Output',"Something went wrong")
-
-def Combine_File():
-    global filepath
-    global sheet_pos
-    combwin = Tk()
-    combwin.title('Combining Excel files')
-
-
-
-    label_comb1 = Label(combwin, text='Note: There are two options for combining the Excel file'
-                                      '\n '
-                                      '\n Option 1: Combine Files--> This will combine the first sheet of all the excel files'
-                                      '\n Option 2: Combine Sheets--> This will Combine all the sheets of that particular excel file'
-                                      '\n'
-                                      '\n While choosing option 2, please ensure that u have only that 1 excel file (whose sheets are to be combined) in that folder.')
-    label_comb1.pack()
-
-    label_1 = Label(combwin, text='\n'
-                                  '\n')
-    label_1.pack()
-
-    Browsebutton = Button(combwin, width=15, text="Opt1:Combine Files", command=Combine_File2)
-    Browsebutton.pack()
-
-    Browsebutton = Button(combwin, width=15, text="Opt2:Combine Sheets", command=Combine_File3)
-    Browsebutton.pack()
-
-    label_1 = Label(combwin, text='\n'
-                                  '\n')
-    label_1.pack()
-
-    combwin.mainloop()
-
-def Combine_File2():
-    global filepath
-    global sheet_pos
-
-
-    pth = os.path.dirname(filepath)
-    extension = os.path.splitext(filepath)[1]
-    files = glob.glob(os.path.join(pth, '*.xls*'))
-    newfile = os.path.join(pth, 'All_Files_Combined_Auto.xlsx')
-    df = pd.DataFrame()
-    response=messagebox.askyesno('Important Check','It has to be ensured that the Row Heading for All the excel files to be combined '
-                                          'are exactly same.\n Any Difference in Row Heading may not combine Excel Properly.!'
-                                          '\n Do You want to Continue?')
-
-
-    if response==1:
-
-        for f in files:
-
-            data = pd.read_excel(f,sheet_name=0)
-            df = df.append(data)
-
-        df.to_excel(newfile, sheet_name='combined', index=False)
-
-        messagebox.showinfo('Output', 'All excel files in the selected folder have been combined.\n Click on OK')
-        label_head7 = Label(LogGui,
-                            text='{n}The Excel Files were Combined.'.format(
-                                n=now.strftime('%y-%m-%d %H:%M:%S')),
-                            bd=1, relief='solid',
-                            font='Times 10', anchor=N)
-        label_head7.pack()
-    else:
-        messagebox.showinfo('Output','Operation terminated. PLease come back after alinging Row Heading Names. \n Click on OK')
-        label_head7 = Label(LogGui,
-                            text='{n}The operation was terminated.'.format(
-                                n=now.strftime('%y-%m-%d %H:%M:%S')),
-                            bd=1, relief='solid',
-                            font='Times 10', anchor=N)
-        label_head7.pack()
-
-def Combine_File3():
-    global filepath
-    global sheet_pos
-
-
-    pth = os.path.dirname(filepath)
-
-    df = pd.DataFrame()
-
-    df2 = pd.DataFrame()
-
-    xl = pd.ExcelFile(filepath)
-
-
-    newfile = os.path.join(pth, 'All_Sheets_Combined_Auto.xlsx')
-
-    response=messagebox.askyesno('Important Check','It has to be ensured that the Row Heading for All the excel sheets to be combined '
-                                          'are exactly same.\n Any Difference in Row Heading may not combine Excel Properly.!'
-                                          '\n Do You want to Continue?')
-
-
-    if response==1:
-        res = len(xl.sheet_names)
-
-        while res>0:
-            res-=1
-            df=pd.read_excel(filepath,sheet_name=res)
-            df2=df2.append(df)
-
-        df2.to_excel(newfile, sheet_name='combined', index=False)
-
-        messagebox.showinfo('Output', 'All excel Sheets in the selected Excel File have been combined. \n Click on OK')
-        label_head7 = Label(LogGui,
-                            text='{n}The Excel Sheets were Combined.'.format(
-                                n=now.strftime('%y-%m-%d %H:%M:%S')),
-                            bd=1, relief='solid',
-                            font='Times 10', anchor=N)
-        label_head7.pack()
-    else:
-        messagebox.showinfo('Output','Operation terminated. PLease come back after alinging Row Heading Names.\n Click on OK')
-        label_head7 = Label(LogGui,
-                            text='{n}The operation was terminated.'.format(
-                                n=now.strftime('%y-%m-%d %H:%M:%S')),
-                            bd=1, relief='solid',
-                            font='Times 10', anchor=N)
-        label_head7.pack()
-
-def Combine_PDF():
-    import glob
-    import os
-    global filepath
-    global label_head7
-    global now
-
-    pth = os.path.dirname(filepath)
-
-    filenames = glob.glob(pth + "/*.pdf")
-
-    merged = PdfFileMerger()
-
-    for files in filenames:
-        merged.append(files)
-
-    extension = os.path.splitext(filepath)[1]
-    filename = os.path.splitext(filepath)[0]
-    pth = os.path.dirname(filepath)
-    newfile = os.path.join(pth, 'Combined_Pdf_File_Auto' + extension)
-
-    merged.write(newfile)
-    merged.close()
-
-    messagebox.showinfo('Output', 'All pdf files in the selected folder have been merged.\n Click on OK')
-    label_head7 = Label(LogGui,
-                        text='{n}The PDF Files have been Combined.'.format(
-                            n=now.strftime('%y-%m-%d %H:%M:%S')),
-                        bd=1, relief='solid',
-                        font='Times 10', anchor=N)
-    label_head7.pack()
-
-def Combine_SAP_Txt_files():
-    import pandas as pd
-    import glob
-    global filepath
-    import os
-
-    pth = os.path.dirname(filepath)
-    extension = os.path.splitext(filepath)[1]
-
-    newfile = os.path.join(pth, 'Combined_Text_File_Auto.txt')
-
-    filenames = glob.glob(pth + "/*.txt")
-
-    df2 = pd.DataFrame()
-
-    for files in filenames:
-        df = pd.read_csv(files, sep="\t", low_memory=False,encoding='cp1252')
-
-        df2 = df2.append(df)
-
-    df2.to_csv(newfile, sep="\t")
-
-    messagebox.showinfo('Output', 'All text files in the selected folder have been merged.\n Click on OK')
-    label_head7 = Label(LogGui,
-                        text='{n}The SAP Text Files have been Combined.'.format(
-                            n=now.strftime('%y-%m-%d %H:%M:%S')),
-                        bd=1, relief='solid',
-                        font='Times 10', anchor=N)
-    label_head7.pack()
-
-    print('All SAP text files in the selected folder have been merged')
 
 def Combine_GSTR2A_File():
     import pandas as pd
@@ -525,17 +159,14 @@ def Combine_GSTR2A_File():
 
     df3['Sheet_Name'] = ("B2B")
 
+    df3['PAN_Number'] = df3["GSTIN_of_Supplier"].apply(lambda x: x[2:12:1])
+
+    df3 = df3.replace(np.nan, "", regex=True)
+
     label_head21=Label(FotaGui,text='The B2B table is being combined... Please wait')
 
     # A.2 : This will iterate through the B2BA file
 
-
-    label_head7 = Label(LogGui,
-                        text='{n}Opertaion in progress..... Please wait. Sheet B2B Being read.'.format(
-                            n=now.strftime('%y-%m-%d %H:%M:%S')),
-                        bd=1, relief='solid',
-                        font='Times 10', anchor=N)
-    label_head7.pack()
 
     df2 = pd.DataFrame()
 
@@ -590,15 +221,15 @@ def Combine_GSTR2A_File():
     df4['Total_tax'] = df4['IGST_Rs'] + df4['CGST_Rs'] + df4['SGST_Rs']
     df4['Unique_ID'] = df4['GSTIN_of_Supplier'] + "/" + df4['Inv_CN_DN_Number_Original'] + "/" + df4[
         'Inv_CN_DN_Date_Unique']
+    df4["Inv_CN_DN_Date_Revised_Unique"]=df4['Inv_CN_DN_Date_Revised'].str.replace("-", ".")
 
     df4['Sheet_Name'] = ("B2BA")
 
-    label_head7 = Label(LogGui,
-                        text='{n}Opertaion in progress..... Please wait. Sheet B2BA Being read.'.format(
-                            n=now.strftime('%y-%m-%d %H:%M:%S')),
-                        bd=1, relief='solid',
-                        font='Times 10', anchor=N)
-    label_head7.pack()
+    df4['PAN_Number'] = df4["GSTIN_of_Supplier"].apply(lambda x: x[2:12:1])
+
+    df4 = df4.replace(np.nan, "", regex=True)
+
+
 
     # A.3 : This will iterate through the CDNR file
 
@@ -658,15 +289,15 @@ def Combine_GSTR2A_File():
     df5['Unique_ID'] = df5['GSTIN_of_Supplier'] + "/" + df5['Inv_CN_DN_Number_Original'] + "/" + df5[
         'Inv_CN_DN_Date_Unique']
 
+
+
     df5['Sheet_Name'] = ("CDNR")
 
+    df5['PAN_Number'] = df5["GSTIN_of_Supplier"].apply(lambda x: x[2:12:1])
 
-    label_head7 = Label(LogGui,
-                        text='{n}Opertaion in progress..... Please wait. Sheet CDNR Being read.'.format(
-                            n=now.strftime('%y-%m-%d %H:%M:%S')),
-                        bd=1, relief='solid',
-                        font='Times 10', anchor=N)
-    label_head7.pack()
+    df5 = df5.replace(np.nan, "", regex=True)
+
+
 
     # A.2 : This will iterate through the CDNRA file
 
@@ -725,15 +356,15 @@ def Combine_GSTR2A_File():
     df6['Unique_ID'] = df6['GSTIN_of_Supplier'] + "/" + df6['Inv_CN_DN_Number_Original'] + "/" + df6[
         'Inv_CN_DN_Date_Unique']
 
+    df6["Inv_CN_DN_Date_Revised_Unique"] = df6['Inv_CN_DN_Date_Revised'].str.replace("-", ".")
+
     df6['Sheet_Name'] = ("CDNRA")
 
+    df6['PAN_Number'] = df6["GSTIN_of_Supplier"].apply(lambda x: x[2:12:1])
 
-    label_head7 = Label(LogGui,
-                        text='{n}Opertaion in progress..... Please wait. Sheet CDNRA Being read.'.format(
-                            n=now.strftime('%y-%m-%d %H:%M:%S')),
-                        bd=1, relief='solid',
-                        font='Times 10', anchor=N)
-    label_head7.pack()
+    df6 = df6.replace(np.nan, "", regex=True)
+
+
 
     # Making a combined sheet with all merged
 
@@ -742,6 +373,29 @@ def Combine_GSTR2A_File():
     df9 = df8.append(df5)
 
     df10 = df9.append(df6)
+
+    df10['PAN_Number'] = df10["GSTIN_of_Supplier"].apply(lambda x: x[2:12:1])
+
+    df10 = df10.replace(np.nan, "", regex=True)
+
+    df10["Ultimate_Unique"]=df10["Sheet_Name"]+"/"+df10["Supply_Attract_Reverse_Charge"]+df10["GSTR_1_5_Filing_Status"]+"/"+df10["Unique_ID"]
+
+
+    df10["PAN_3_Way_Key"] = np.where(df10["Sheet_Name"] == "B2BA",
+                                     df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Number_Revised"] + "/"
+                                     + df10["Inv_CN_DN_Date_Revised_Unique"],
+                                     df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Number_Original"]
+                                     + "/" + df10["Inv_CN_DN_Date_Unique"])
+
+    df10["PAN_2_Way_Key_PAN_InvNo"] = np.where(df10["Sheet_Name"] == "B2BA",
+                                               df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Number_Revised"]
+                                               , df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Number_Original"])
+
+    df10["PAN_2_Way_Key_PAN_InvDt"] = np.where(df10["Sheet_Name"] == "B2BA",
+                                               df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Date_Revised_Unique"]
+                                               , df10["PAN_Number"] + "/" + df10["Inv_CN_DN_Date_Unique"])
+
+
 
     # maiking a sheet with person who did not file the GSTR 1
 
@@ -887,167 +541,31 @@ def Combine_GSTR2A_File():
 
     messagebox.showinfo('Output','All GSTR2A files have been combined!. \n Click on OK')
 
-    label_head7 = Label(LogGui,
-                        text='{n}The GSTR 2A  Files have been Combined.'.format(
-                            n=now.strftime('%y-%m-%d %H:%M:%S')),
-                        bd=1, relief='solid',
-                        font='Times 10', anchor=N)
-    label_head7.pack()
-
-def Extract_Text():
-    global filepath
-    global label_head7
-    global now
-
-    pdfDir=os.path.dirname(filepath)
-    txtDir=os.path.dirname(filepath)
-
-    if pdfDir == "": pdfDir = os.getcwd() + "\\"  # if no pdfDir passed in
-    for pdf in os.listdir(pdfDir):  # iterate through pdfs in pdf directory
-        fileExtension = pdf.split(".")[-1]
-        if fileExtension == "pdf":
-            pdfFilename = pdfDir +"\\"+ pdf
-            text = convert(pdfFilename)  # get string of text content of pdf
-            textFilename = txtDir + "\\"+ pdf + ".txt"
-            textFile = open(textFilename, "w")  # make text file
-            textFile.write(text)  # write text to text file
-        textFile.close
-
-    messagebox.showinfo('Output', 'All pdf files have been converted to text file.\n Click on OK')
-    label_head7 = Label(LogGui,
-                        text='{n}The PDF Files have been converted to text.'.format(
-                            n=now.strftime('%y-%m-%d %H:%M:%S')),
-                        bd=1, relief='solid',
-                        font='Times 10', anchor=N)
-    label_head7.pack()
-
-def convert(fname, pages=None):
-
-    if not pages:
-        pagenums = set()
-    else:
-        pagenums = set(pages)
-
-    output = io.StringIO()
-    manager = PDFResourceManager()
-    converter = TextConverter(manager, output, laparams=LAParams())
-    interpreter = PDFPageInterpreter(manager, converter)
-
-    infile = open(fname, 'rb')
-    for page in PDFPage.get_pages(infile, pagenums):
-        interpreter.process_page(page)
-    infile.close()
-    converter.close()
-    text = output.getvalue()
-    output.close
-    # print (text)
-    return text
-
-def Extract_Table():
-    global filepath
-    global label_head7
-    global now
-
-    pth = os.path.dirname(filepath)
 
 
-    df =pd.DataFrame()
+label_0 = Label(FotaGui, text='\n')
+label_0.pack()
 
-    tables=tb.read_pdf(filepath,pages="all",multiple_tables=True)
-    for table in tables:
-        i=0
-        # df = pd.concat(table)
-        excel_file = table.to_excel('pdf+convert.xlsx',sheet_name="Table_"+i)
-        i+=1
-    # print(tables[2])
-
-    # csv_table=tb.convert_into(filepath,pth,'Tables_convert.csv')
-    # # df=pd.concat(tables)
-    # df=tb.convert_into(filepath)
-    # excel_file=df.to_excel('pdf+convert.xlsx')
-    #
-    # print(df)
-    # print(tables)
-    #
-    # tabula.io.convert_into(filepath,pth,'csv',lattice=True)
-    # df_tables=read(filepath,pages='all')
-    # print(tabulate(df_tables))
-    #
-    # writer = pd.ExcelWriter("Table_Extracted.xlsx", engine='openpyxl')
-    #
-    # df_tables.to_excel(writer, sheet_name="Tables")
-    #
-
-    # if pdfDir == "": pdfDir = os.getcwd() + "\\"  # if no pdfDir passed in
-    # for pdf in os.listdir(pdfDir):  # iterate through pdfs in pdf directory
-    #     fileExtension = pdf.split(".")[-1]
-    #     if fileExtension == "pdf":
-    #         pdfFilename = pdfDir +"\\"+ pdf
-    #         text = convert(pdfFilename)  # get string of text content of pdf
-    #         textFilename = txtDir + "\\"+ pdf + ".txt"
-    #         textFile = open(textFilename, "w")  # make text file
-    #         textFile.write(text)  # write text to text file
-    #     textFile.close
-    #
-    # messagebox.showinfo('Output', 'All pdf files have been converted to text file.\n Click on OK')
-    # label_head7 = Label(LogGui,
-    #                     text='{n}The PDF Files have been converted to text.'.format(
-    #                         n=now.strftime('%y-%m-%d %H:%M:%S')),
-    #                     bd=1, relief='solid',
-    #                     font='Times 10', anchor=N)
-    # label_head7.pack()
-
-    # writer.save()
-
-def Clear_Memory():
-    messagebox.showinfo('Memory Clear','The file selected have been cleared from memory')
-    now=datetime.datetime.now()
-    label_head12=Label(LogGui,text='{n}:The file selected have been cleared from memory. You may browse file again '.format(n=now.strftime("%y-%m-%d %H:%M:%S")))
-    label_head12.pack()
-
-Browsebutton = Button(FotaGui, width=15, text="HELP_INFO", command=HELP_INFO)
-Browsebutton.pack()
-
-
-label_0 = Label(FotaGui, text='\n'
-                               '\n Step: 1 Select the File by clicking Browse Button !!!' ,font='Times 11', anchor=N)
+label_0 = Label(FotaGui, text='Step: 1 Select the File by clicking Browse Button !!!' ,font='Times 11', anchor=N,bd=1, relief='solid')
 label_0.pack()
 
 Browsebutton = Button(FotaGui, width=15, text="BROWSE", command=file_path)
 Browsebutton.pack()
 
-Browsebutton = Button(FotaGui, width=20, text="Clear Memory", command=Clear_Memory)
-Browsebutton.pack()
 
-label_20 = Label(FotaGui, text='\n'
-                               '\n Step: 2 Click on the Action which you want to Perform !!!'
-                               '\n',font='Times 11', anchor=N)
-label_20.pack()
+label_head3 = Label(FotaGui, text='\n'
+                               '\n'
+                               )
+label_head3.pack()
 
-Browsebutton = Button(FotaGui, width=20, text="Split Excel Files", command=SPLIT_FILE)
-Browsebutton.pack()
+label_head4 = Label(FotaGui, text='Step 2: Click on the action button at the below:', bd=1, relief='solid',
+                        font='Times 12', anchor=N)
 
+label_head4.pack()
 
-Browsebutton = Button(FotaGui, width=20, text="Combine Normal Excel Files", command=Combine_File)
-Browsebutton.pack()
+Button_1=Button(FotaGui,text="Combine GSTR2A files",command=Combine_GSTR2A_File)
+Button_1.pack()
 
-Browsebutton = Button(FotaGui, width=20, text="Combine Pdf Files", command=Combine_PDF)
-Browsebutton.pack()
-
-Browsebutton = Button(FotaGui, width=20, text="Combine Txt Files", command=Combine_SAP_Txt_files)
-Browsebutton.pack()
-
-Browsebutton = Button(FotaGui, width=20, text="Combine GSTR2A Files", command=Combine_GSTR2A_File)
-Browsebutton.pack()
-
-Browsebutton = Button(FotaGui, width=20, text="Convert Pdf to Text", command=Extract_Text)
-Browsebutton.pack()
-
-Browsebutton = Button(FotaGui, width=20, text="Extract table to Excel", command=Extract_Table)
-Browsebutton.pack()
-
-label_head11=Label(LogGui, text='Log of all Activities:',anchor=W)
-label_head11.pack()
 
 label_head12 = Label(FotaGui, text="   \n"
                                     "\n"
@@ -1057,6 +575,7 @@ label_head12 = Label(FotaGui, text="   \n"
                                     "\n Send your feedback at pranav.tulshyan@gmail.com ", font="Times 10 ")
 
 label_head12.pack()
+
 
 LogGui.mainloop()
 

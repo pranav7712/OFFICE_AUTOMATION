@@ -14,20 +14,20 @@ for f in files_to_sign:
     time.sleep(2)
     pyautogui.write("Acrobat Reader")
     pyautogui.press("enter")
-    time.sleep(2)
+    time.sleep(3)
 
     pyautogui.hotkey('ctrl','o')
-    time.sleep(2)
+    time.sleep(3)
     pyautogui.write(f)
-    time.sleep(2)
+    time.sleep(3)
     pyautogui.press("enter")
-    time.sleep(2    )
+    time.sleep(3)
     pyautogui.click(x=127,y=77,button='left')  #click on tools
-    time.sleep(2)
+    time.sleep(3)
     pyautogui.click(x=363,y=535,button='left') #click on Certificates
-    time.sleep(2)
+    time.sleep(3)
     pyautogui.click(x=762,y=186,button='left') #click on Digitally Sign
-    time.sleep(2)
+    time.sleep(3)
     pyautogui.keyDown('ctrl')
     pyautogui.press('end')
     pyautogui.keyUp('ctrl')

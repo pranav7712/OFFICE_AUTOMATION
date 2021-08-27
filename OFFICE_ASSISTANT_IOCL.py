@@ -293,7 +293,9 @@ def Combine_File2():
         for f in files:
 
             data = pd.read_excel(f,sheet_name=0)
+            data["File_Name"] = f
             df = df.append(data)
+
 
         df.to_excel(newfile, sheet_name='combined', index=False)
 

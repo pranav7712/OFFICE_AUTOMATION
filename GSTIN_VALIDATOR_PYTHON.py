@@ -1,5 +1,4 @@
-#import the required modules
-
+from tkhtmlview import HTMLLabel
 import pandas as pd
 import os
 from tkinter import *
@@ -12,71 +11,60 @@ from datetime import date
 import datetime
 import time
 import glob
+from PIL import ImageTk, Image
+from ttkthemes import ThemedTk
 
-#create the Tkinter main loop
-
-fotagui = Tk()
+fotagui = ThemedTk(theme="black")
 fotagui.geometry("600x600")
+
+fotagui.configure(background='black')
+
 fotagui.title("GSTIN STATUS REPORT")
 
-#multiple labels to be displayed in the box
+fotagui.minsize(600, 600)
+fotagui.maxsize(600, 600)
 
-Label_0=Label(fotagui, text='This is the program to Check Multiple GSTIN Status at once .'
-                                      ' \n   .', bd=1, relief='solid', font='Times 12', anchor=N)
-Label_0.pack()
+my_canvas = Canvas(fotagui, width=600, height=600, bg='blue')
+my_canvas.pack()
 
-Label_1=Label(fotagui, text='You need to Upload a Input file using Browse Input File Button.'
-                                      ' \n   .', bd=1, relief='solid', font='Times 12', anchor=N)
-Label_1.pack()
-
-Label_4=Label(fotagui,text="Format of Input Excel File"
-                           "\n Simple mention the GSTIN in Column A"
-                           "\n Keep Heading of Column A as GSTIN" , bd=1, relief='solid', font='Times 12', anchor=N )
-
-Label_4.pack()
-label_2 = Label(fotagui, text='\n'
-                              '\n'
-                              'Please write sets of GSTNs to check(Total no.of GSTNs/ 500) in Black Box Below:'
-                              '\n For e.g if you have 1250 GSTIN in input file , then Mention 3'
-                              '\n In case less than 500 GSTIN in input file, then Mention 1',bd=1, relief='solid', font='Times 12', anchor=N )
-label_2.pack()
-
-e_1 = Entry(fotagui, width=5, bg="black", fg="white")
-e_1.pack()
+e_1 = Entry(fotagui, font=("Helventica", 18), width=8, fg="#336d92", bd=0, justify='center')
+e_1.insert(0, "---")
+entry_window = my_canvas.create_window(300, 300, window=e_1)
 
 
-#defining a function. This function will be attached to the button Browse File .
+def entry_clear(e):
+    if e_1.get() == '---':
+        e_1.delete(0, END)
+
+
+e_1.bind("<Enter>", entry_clear)
+
+
+# e_1.pack()
+
 
 def browse_file():
     global fname
     fname = filedialog.askopenfilename(filetypes=(("Excel Files", "*.xlsx"), ("All files", "*")))
 
 
-Label_5=Label(fotagui, text='Click Button below and Select that Excel file with GSTIN Numbers.'
-                                      ' \n   .', bd=1, relief='solid', font='Times 12', anchor=N)
-Label_5.pack()
-
 x = Button(fotagui, text='Browse Input Excel File', command=browse_file)
-x.pack()
+x_window = my_canvas.create_window(300, 200, window=x)
 
-
-
-#defining a function. This function will be attached to the button named Click Here.
 
 def program():
     global fname
     df = pd.read_excel(fname, index_col=False)
     name = df.columns[0]
-    df=df.rename(columns={name:"GSTIN"})  #this is done so that heading of col A is changed to GSTIN and is useful in merging
+    df = df.rename(columns={name: "GSTIN"})
 
     dir_fname = os.path.dirname(fname)
-    dir_fname1=dir_fname.replace("/", "\\")  #In selenium, while keeping default download path as Prefs, the one with / was showing error as it was not being read as a windows path. So changed that to \\
+    dir_fname1 = dir_fname.replace("/", "\\")
     print(dir_fname1)
 
     chrome_options = webdriver.ChromeOptions()
-    prefs = {"download.default_directory": dir_fname1}   #this preference settings is done so that the file gets downloaded in the folder deaired andnot in the default download folder
+    prefs = {"download.default_directory": dir_fname1}
     chrome_options.add_experimental_option('prefs', prefs)
-    # driver = webdriver.Chrome(chrome_options=chrome_options)
 
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
 
@@ -105,46 +93,71 @@ def program():
         output = driver.find_element_by_xpath('/html/body/div[1]/div/div/div/div[2]/div[1]/h5/a')
         output.click()
 
-        driver.find_element_by_tag_name('body').send_keys(Keys.COMMAND + 't')  #this creates a new tab , so no need to click back button
+        driver.find_element_by_tag_name('body').send_keys(Keys.COMMAND + 't')
         driver.get('https://my.gstzen.in/p/gstin-validator/')
 
         a = a + 500
         b = b + 500
 
-    # driver.quit()
+    driver.quit()
 
-    down_files=glob.glob(dir_fname1+"//TAXPAYER*.xlsx")   #this is toiterate through the downloaded files. Since the Downaloded files name start with TaxPaer, so we use glob to iterate all files with name starting with Taxpayer
+    down_files = glob.glob(dir_fname1 + "//TAXPAYER*.xlsx")
 
-    df2=pd.DataFrame()
+    df2 = pd.DataFrame()
     for i in down_files:
-        df1=pd.read_excel(i)
-        df2=df2.append(df1)  #this is for appending all the file and making a single data frame
+        df1 = pd.read_excel(i)
+        df2 = df2.append(df1)
 
-    df4=df.merge(df2,left_on="GSTIN",right_on="GSTIN",how="left")  #here we are doing a Left Merge , so that the main file i.e df remains intact and other columns are addedin that file
+    df4 = df.merge(df2, left_on="GSTIN", right_on="GSTIN", how="left")
     output_file = os.path.join(dir_fname1, "Output_GST.xlsx")
-    df4.to_excel(output_file, engine="openpyxl" , index=False)
+    df4.to_excel(output_file, engine="openpyxl", index=False)
 
-    messagebox.showinfo('Output', 'All GSTIN status have been extracted and kept in this location: {}!. \n Click on OK'.format(output_file))
-
-
-Label_6=Label(fotagui, text='Click Button below to Generate Output file with GSTIN Status.'
-                                      ' \n   .', bd=1, relief='solid', font='Times 12', anchor=N)
-Label_6.pack()
+    messagebox.showinfo('Output',
+                        'All GSTIN status have been extracted and kept in this location: {}!. \n Click on OK'.format(
+                            output_file))
 
 
-Button_1 = Button(fotagui, text="CLICK to Check GSTINs", command=program)
-Button_1.pack(padx=10, pady=10)
+Button_1 = Button(fotagui, text="CLICK HERE", command=program)
+Button_1_window = my_canvas.create_window(300, 370, window=Button_1)
 
-label_7 = Label(fotagui, text='\n'
-                              '\n'
-                              'For any query relating to the program, write to us at:'
-                              '\n efficientcorporates.info@gmail.com'
-                              '\n Feel free to provide your feedback & Suggestions.',bd=1, relief='solid', font='Times 12', anchor=N )
-label_7.pack()
+my_label = HTMLLabel(fotagui,
+                     html="<h1><a href='https://drive.google.com/drive/folders/1Ee-XzAVd-8N01_Ok0DhAzWJDZh447HKN?usp=sharing'>Learn to use!</a><h1>")
 
+my_label_window = my_canvas.create_window(510, 600, window=my_label)
 
+button6 = Button(fotagui, text="Help")
+button7 = Button(fotagui, text="Exit", command=fotagui.destroy)
+
+button6_window = my_canvas.create_window(20, 10, anchor="nw", window=button6)
+button7_window = my_canvas.create_window(550, 10, anchor="nw", window=button7)
+
+my_canvas.create_rectangle(0, 0, 600, 110, fill="#F0F0F0")
+
+my_canvas.create_text(300, 60, text="This is the program to Check Multiple GSTIN Status at once .",
+                      font=("Times New Roman", 15), fill="black")
+my_canvas.create_text(300, 90, text="You need to Upload a Input file using Browse Input Excel File Button.",
+                      font=("Times New Roman", 15), fill="black")
+my_canvas.create_text(300, 150, text="               Format of Input Excel File:"
+                                     "\n   Simple mention the GSTIN in Column A."
+                                     "\n        Keep Heading of Column A as GSTIN.", font=("Bahnschrift Light", 12),
+                      fill="white")
+
+my_canvas.create_text(300, 250,
+                      text="   Please write sets of GSTNs to check(Total no.of GSTNs/ 500) in White Box Below:"
+                           "\n                 For e.g if you have 1250 GSTIN in input file , then Mention 3."
+                           "\n                          In case less than 500 GSTIN in input file, then Mention 1.",
+                      font=("Bahnschrift Light", 10), fill="white")
+
+my_canvas.create_text(300, 335, text="Click Button below to Generate Output file with GSTIN Status.",
+                      font=("Bahnschrift Light", 12), fill="white")
+
+my_canvas.create_rectangle(0, 400, 600, 600, fill="#F0F0F0")
+
+my_canvas.create_text(300, 387, text="For any issues / Feedbacks , Send mail at efficientcorporates.info@gmail.com",
+                      font=("Bahnschrift Light", 10), fill="white")
 
 fotagui.mainloop()
+
 
 
 

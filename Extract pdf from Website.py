@@ -98,6 +98,9 @@ extract_url_pdf(input_url="https://cbic-gst.gov.in/central-tax-notifications.htm
 
 # In[ ]:
 
+extract_url_pdf(input_url="https://www.icai.org/post.html?post_id=17827")
+
+
 
 
 

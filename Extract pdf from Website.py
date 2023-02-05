@@ -6,7 +6,7 @@
 
 import os
 
-def extract_url_pdf(input_url,folder_path=os.getcwd()):
+def extract_url_pdf(input_url,folder_path=os.getcwd(), extension='.pdf'):
     
     import os
     import requests
@@ -14,14 +14,12 @@ def extract_url_pdf(input_url,folder_path=os.getcwd()):
     from bs4 import BeautifulSoup
     import pandas as pd
     import datetime
-    
-    url = input_url
 
     #If there is no such folder, the script will create one automatically
     folder_location = folder_path
     if not os.path.exists(folder_location):os.mkdir(folder_location)
 
-    response = requests.get(url)
+    response = requests.get(input_url)
     soup= BeautifulSoup(response.text, "html.parser") 
 
     link_text=list()
@@ -30,12 +28,12 @@ def extract_url_pdf(input_url,folder_path=os.getcwd()):
     
     counter=0
 
-    for link in soup.select("a[href$='.pdf']"):
+    for link in soup.select(f"a[href$='{extension}']"):
         #Name the pdf files using the last portion of each link which are unique in this case
         
         filename = os.path.join(folder_location,link['href'].split('/')[-1])
         with open(filename, 'wb') as f:
-            f.write(requests.get(urljoin(url,link['href'])).content)
+            f.write(requests.get(urljoin(input_url,link['href'])).content)
             
         link_text.append(str(link.text))
         
